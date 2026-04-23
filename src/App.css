@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+  margin: 0;
+  background: #0d0d0f;
+  color: #fff;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px 24px 44px;
+  font-family: 'Azeret Mono', monospace;
+  color: #fff;
+}
+
+.app-header {
+  background: transparent;
+  color: #fff;
+  text-align: center;
+  border-radius: 0;
+  padding: 8px 0 18px;
+  margin-bottom: 30px;
+}
+
+.app-header h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.8rem, 3.6vw, 2.5rem);
+  letter-spacing: 0.06em;
+}
+
+.app-header p {
+  margin: 0;
+  color: #d5d5d5;
+  font-size: 0.92rem;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a1a;
+  padding: 14px;
+  min-height: 350px;
+  box-shadow: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+  color: #fff;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  background: #202023;
+}
+
+.unavailable {
+  opacity: 0.65;
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.badge-green {
+  background: #f2f2f2;
+  color: #101010;
+}
+
+.badge-red {
+  background: #3a3a3d;
+  color: #f1f1f1;
+}
+
+.product-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  margin-bottom: 12px;
+  background: #111;
+}
+
+.category {
+  margin: 0 0 7px;
+  text-transform: uppercase;
+  color: #cfcfcf;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.product-card h3 {
+  margin: 0 0 9px;
+  font-size: 1.3rem;
+  line-height: 1.25;
+}
+
+.rating {
+  color: #f4f4f4;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.86rem;
+}
+
+.review-count {
+  color: #c7c7c7;
+  font-size: 0.8rem;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.card-footer strong {
+  font-size: 1.2rem;
+  letter-spacing: 0.03em;
+}
+
+.add-btn {
+  border: none;
+  background: #fff;
+  color: #1a1a1a;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.add-btn:disabled {
+  background: #5a5a5a;
+  color: #cbcbcb;
+  cursor: not-allowed;
+}
+
+.add-btn:not(:disabled):hover {
+  background: #dfdfdf;
+}
