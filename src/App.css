@@ -35,6 +35,23 @@ body {
   font-size: 0.92rem;
 }
 
+.description-block {
+  margin: 0 auto 22px;
+  max-width: 760px;
+  text-align: center;
+}
+
+.product-desc {
+  font-size: 0.7rem;
+}
+
+.description-block p {
+  margin: 0;
+  color: #c8c8c8;
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -67,6 +84,18 @@ body {
   top: 10px;
   right: 10px;
   padding: 3px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 8px;
+  background: #fff;
+  color: #101010;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.03em;

@@ -2,6 +2,7 @@ const products = [
   {
     id: 1,
     name: "Wireless Headphones",
+    description: "High-quality noise-canceling headphones for immersive sound.",
     price: 89.99,
     rating: 4.5,
     reviews: 128,
@@ -12,35 +13,35 @@ const products = [
   {
     id: 2,
     name: "Laptop Stand",
+    description: "Ergonomic aluminum stand to keep your laptop cool.",
     price: 49.99,
     rating: 4.8,
     reviews: 256,
     inStock: true,
     category: "Accessories",
-    image:
-      "https://picsum.photos/id/237/200/300",
+    image: "https://picsum.photos/id/237/200/300",
   },
   {
     id: 3,
     name: "Mechanical Keyboard",
+    description: "Tactile switches with customizable RGB backlighting.",
     price: 129.99,
     rating: 4.3,
     reviews: 89,
     inStock: false,
     category: "Electronics",
-    image:
-      "https://picsum.photos/seed/picsum/200/300",
+    image: "https://picsum.photos/seed/picsum/200/300",
   },
   {
     id: 4,
     name: "USB-C Hub",
+    description: "Expand your connectivity with 7 versatile ports.",
     price: 39.99,
     rating: 4.6,
     reviews: 342,
     inStock: true,
     category: "Accessories",
-    image:
-      "https://picsum.photos/200/300?grayscale",
+    image: "https://picsum.photos/200/300?grayscale",
   },
 ]
 
