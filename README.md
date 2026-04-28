@@ -7,3 +7,5 @@ Please use the branch links below to view each lab.
 
 - [Lab 1 - Greeting App (lab01)](https://github.com/xircons/960311-assignment/tree/lab01)
 - [Lab 2 - Product Card Gallery (lab02)](https://github.com/xircons/960311-assignment/tree/lab02)
+- [Lab 3 - session3 ](https://github.com/xircons/960311-assignment/tree/session3)
+- [Lab 4 - session4 ](https://github.com/xircons/960311-assignment/tree/session4)
