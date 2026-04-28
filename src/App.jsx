@@ -91,8 +91,8 @@ function App() {
     <main className="app-shell">
       <div className="app-container">
         <header className="app-header">
-          <h1>Interactive To-Do List</h1>
-          <p>Track tasks with a strict dark brutalist interface.</p>
+          <h1>To-Do List</h1>
+          {/* <p>..</p> */}
         </header>
 
         <TaskInput onAddTask={handleAddTask} />
