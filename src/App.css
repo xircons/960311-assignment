@@ -89,6 +89,36 @@ button {
   border: 2px solid #ffffff;
 }
 
+.top-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid #ffffff;
+}
+
+.select-all-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.select-all-control input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #ffffff;
+}
+
+.remaining-badge {
+  padding: 8px 12px;
+  border: 1px solid #ffffff;
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
 .task-input-form button,
 .filter-section button,
 .clear-button,
@@ -108,10 +138,14 @@ button {
 }
 
 .filter-section {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
+}
+
+.filter-section button {
+  width: 100%;
 }
 
 .filter-section button.active {
@@ -129,7 +163,7 @@ button {
 
 .task-list li {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   gap: 12px;
   align-items: center;
   padding: 14px 0;
@@ -145,6 +179,19 @@ button {
 
 .task-list li span {
   word-break: break-word;
+}
+
+.task-list li .edit-input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid #ffffff;
+  outline: none;
+}
+
+.task-list li .edit-input:focus {
+  border: 2px solid #ffffff;
 }
 
 .task-list li.completed span {
@@ -171,6 +218,15 @@ button {
   }
 
   .task-input-form {
+    grid-template-columns: 1fr;
+  }
+
+  .top-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-section {
     grid-template-columns: 1fr;
   }
 

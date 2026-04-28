@@ -1,15 +1,27 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import TaskInput from './components/TaskInput'
 import TaskItem from './components/TaskItem'
 
 function App() {
-  const [tasks, setTasks] = useState([
-    { id: 1, text: 'Read React docs', completed: false },
-    { id: 2, text: 'Build the to-do interface', completed: true },
-    { id: 3, text: 'Review state management', completed: false },
-  ])
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem('todo-tasks')
+
+    if (!savedTasks) {
+      return []
+    }
+
+    try {
+      return JSON.parse(savedTasks)
+    } catch {
+      return []
+    }
+  })
   const [filter, setFilter] = useState('all')
+
+  useEffect(() => {
+    localStorage.setItem('todo-tasks', JSON.stringify(tasks))
+  }, [tasks])
 
   const handleAddTask = (text) => {
     const newTask = {
@@ -33,8 +45,31 @@ function App() {
     setTasks((previousTasks) => previousTasks.filter((task) => task.id !== id))
   }
 
-  const handleClearCompleted = () => {
+  const clearCompleted = () => {
     setTasks((previousTasks) => previousTasks.filter((task) => !task.completed))
+  }
+
+  const handleEdit = (id, newText) => {
+    const trimmed = newText.trim()
+
+    if (!trimmed) {
+      return
+    }
+
+    setTasks((previousTasks) =>
+      previousTasks.map((task) => (task.id === id ? { ...task, text: trimmed } : task)),
+    )
+  }
+
+  const handleSelectAll = (event) => {
+    const isChecked = event.target.checked
+
+    setTasks((previousTasks) =>
+      previousTasks.map((task) => ({
+        ...task,
+        completed: isChecked,
+      })),
+    )
   }
 
   const filteredTasks = tasks.filter((task) => {
@@ -49,6 +84,9 @@ function App() {
     return true
   })
 
+  const remainingCount = tasks.filter((task) => !task.completed).length
+  const allSelected = tasks.length > 0 && tasks.every((task) => task.completed)
+
   return (
     <main className="app-shell">
       <div className="app-container">
@@ -58,6 +96,16 @@ function App() {
         </header>
 
         <TaskInput onAddTask={handleAddTask} />
+
+        <section className="top-controls" aria-label="Task controls">
+          <label className="select-all-control">
+            <input type="checkbox" checked={allSelected} onChange={handleSelectAll} />
+            <span>Select All</span>
+          </label>
+          <div className="remaining-badge" aria-live="polite">
+            Remaining: {remainingCount}
+          </div>
+        </section>
 
         <section className="filter-section" aria-label="Task filters">
           <button
@@ -90,11 +138,12 @@ function App() {
               task={task}
               onToggle={handleToggle}
               onDelete={handleDelete}
+              onEdit={handleEdit}
             />
           ))}
         </ul>
 
-        <button type="button" className="clear-button" onClick={handleClearCompleted}>
+        <button type="button" className="clear-button" onClick={clearCompleted}>
           Clear Completed
         </button>
       </div>
