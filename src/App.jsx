@@ -1,75 +1,104 @@
-import { useMemo, useState } from 'react'
-import CountryCard from './components/CountryCard.jsx'
-import SearchBar from './components/SearchBar'
-import useFetch from './hooks/useFetch'
+import { useState } from 'react'
 import './App.css'
+import TaskInput from './components/TaskInput'
+import TaskItem from './components/TaskItem'
 
 function App() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedRegion, setSelectedRegion] = useState('All')
-  const { data, loading, error } = useFetch(
-    'https://restcountries.com/v3.1/all?fields=name,capital,population,region,flags,languages'
-  )
-  const countries = data ?? []
+  const [tasks, setTasks] = useState([
+    { id: 1, text: 'Read React docs', completed: false },
+    { id: 2, text: 'Build the to-do interface', completed: true },
+    { id: 3, text: 'Review state management', completed: false },
+  ])
+  const [filter, setFilter] = useState('all')
 
-  const regions = ['All', 'Africa', 'Americas', 'Asia', 'Europe', 'Oceania']
-
-  const filtered = useMemo(() => {
-    if (!countries.length) {
-      return []
+  const handleAddTask = (text) => {
+    const newTask = {
+      id: Date.now(),
+      text,
+      completed: false,
     }
 
-    return [...countries]
-      .filter((country) => {
-        const matchesSearch = country.name.common
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-        const matchesRegion =
-          selectedRegion === 'All' || country.region === selectedRegion
+    setTasks((previousTasks) => [...previousTasks, newTask])
+  }
 
-        return matchesSearch && matchesRegion
-      })
-      .sort((a, b) => a.name.common.localeCompare(b.name.common))
-  }, [countries, searchTerm, selectedRegion])
+  const handleToggle = (id) => {
+    setTasks((previousTasks) =>
+      previousTasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task,
+      ),
+    )
+  }
+
+  const handleDelete = (id) => {
+    setTasks((previousTasks) => previousTasks.filter((task) => task.id !== id))
+  }
+
+  const handleClearCompleted = () => {
+    setTasks((previousTasks) => previousTasks.filter((task) => !task.completed))
+  }
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === 'active') {
+      return !task.completed
+    }
+
+    if (filter === 'completed') {
+      return task.completed
+    }
+
+    return true
+  })
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>Country Explorer</h1>
-        <p>Browse countries by name and region.</p>
-      </header>
+    <main className="app-shell">
+      <div className="app-container">
+        <header className="app-header">
+          <h1>Interactive To-Do List</h1>
+          <p>Track tasks with a strict dark brutalist interface.</p>
+        </header>
 
-      <SearchBar onSearch={setSearchTerm} searchTerm={searchTerm} />
+        <TaskInput onAddTask={handleAddTask} />
 
-      <div className="filters">
-        {regions.map((region) => (
+        <section className="filter-section" aria-label="Task filters">
           <button
-            key={region}
-            onClick={() => setSelectedRegion(region)}
-            className={selectedRegion === region ? 'active' : ''}
+            type="button"
+            className={filter === 'all' ? 'active' : ''}
+            onClick={() => setFilter('all')}
           >
-            {region}
+            All
           </button>
-        ))}
+          <button
+            type="button"
+            className={filter === 'active' ? 'active' : ''}
+            onClick={() => setFilter('active')}
+          >
+            Active
+          </button>
+          <button
+            type="button"
+            className={filter === 'completed' ? 'active' : ''}
+            onClick={() => setFilter('completed')}
+          >
+            Completed
+          </button>
+        </section>
+
+        <ul className="task-list">
+          {filteredTasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onToggle={handleToggle}
+              onDelete={handleDelete}
+            />
+          ))}
+        </ul>
+
+        <button type="button" className="clear-button" onClick={handleClearCompleted}>
+          Clear Completed
+        </button>
       </div>
-
-      {loading && <p className="status-message">Loading countries...</p>}
-      {error && <p className="status-message error">Error: {error}</p>}
-
-      {!loading && !error && (
-        <>
-          <p className="stats-text">
-            Showing {filtered.length} of {countries.length} countries
-          </p>
-
-          <div className="country-grid">
-            {filtered.map((country) => (
-              <CountryCard key={country.name.common} country={country} />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+    </main>
   )
 }
 
