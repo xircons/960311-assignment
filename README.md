@@ -1,12 +1,19 @@
-# 960311 Assignment
+# AcadeMate — Lab 7 / Session 1 Prototype
 
-This `main` branch is a landing page.
-Please use the branch links below to view each lab.
+Vite + React. Local state only (`useState` in `App.jsx`).
 
-## Labs
+## Setup
 
-- [Lab 1 - Greeting App (lab01)](https://github.com/xircons/960311-assignment/tree/lab01)
-- [Lab 2 - Product Card Gallery (lab02)](https://github.com/xircons/960311-assignment/tree/lab02)
-- [Lab 3 - session3 ](https://github.com/xircons/960311-assignment/tree/session3)
-- [Lab 4 - session4 ](https://github.com/xircons/960311-assignment/tree/session4)
-- [Lab 5 - session5 ](https://github.com/xircons/960311-assignment/tree/session5)
+```bash
+npm install
+npm run dev
+```
+
+Open the URL shown in the terminal (default `http://localhost:5173`).
+
+## Build
+
+```bash
+npm run build
+npm run preview
+```

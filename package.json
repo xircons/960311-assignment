@@ -1,5 +1,5 @@
 {
-  "name": "lab5-expense-tracker",
+  "name": "academate",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,12 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lucide-react": "^1.14.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^5.0.0",
-    "vite": "^7.0.0"
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
   }
 }
