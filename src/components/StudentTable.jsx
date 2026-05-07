@@ -1,4 +1,14 @@
-function StudentTable({ students, onDeleteStudent }) {
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteStudent, updateStudent } from '../features/students/studentsSlice.js';
+import { selectAllStudents } from '../features/students/selectors.js';
+import EditModal from './EditModal.jsx';
+
+function StudentTable() {
+  const dispatch = useDispatch();
+  const students = useSelector(selectAllStudents);
+  const [editing, setEditing] = useState(null);
+
   return (
     <section className="panel panel-main">
       <h2 className="panel-header">STUDENTS</h2>
@@ -11,7 +21,12 @@ function StudentTable({ students, onDeleteStudent }) {
               <th>ID</th>
               <th>MAJOR</th>
               <th>GPA</th>
-              <th className="col-act">ACT</th>
+              <th
+                className="col-act"
+                style={{ minWidth: '120px', width: 'auto' }}
+              >
+                ACT
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -32,12 +47,24 @@ function StudentTable({ students, onDeleteStudent }) {
                   <td>{student.studentId.toUpperCase()}</td>
                   <td>{student.major.toUpperCase()}</td>
                   <td>{student.gpa.toFixed(2)}</td>
-                  <td className="col-act">
+                  <td
+                    className="col-act"
+                    style={{ minWidth: '120px', width: 'auto' }}
+                  >
+                    <button
+                      type="button"
+                      className="btn-x"
+                      style={{ marginRight: '14px' }}
+                      aria-label={`Edit ${student.name}`}
+                      onClick={() => setEditing(student)}
+                    >
+                      EDIT
+                    </button>
                     <button
                       type="button"
                       className="btn-x"
                       aria-label={`Delete ${student.name}`}
-                      onClick={() => onDeleteStudent(student.id)}
+                      onClick={() => dispatch(deleteStudent(student.id))}
                     >
                       X
                     </button>
@@ -48,6 +75,16 @@ function StudentTable({ students, onDeleteStudent }) {
           </tbody>
         </table>
       </div>
+      {editing ? (
+        <EditModal
+          student={editing}
+          onSave={(payload) => {
+            dispatch(updateStudent(payload));
+            setEditing(null);
+          }}
+          onCancel={() => setEditing(null)}
+        />
+      ) : null}
     </section>
   );
 }

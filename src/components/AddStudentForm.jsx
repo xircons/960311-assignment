@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { addStudent } from '../features/students/studentsSlice.js';
 
 const emptyForm = { name: '', studentId: '', major: '', gpa: '' };
 
-function AddStudentForm({ onAddStudent }) {
+function AddStudentForm() {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState(emptyForm);
   const [error, setError] = useState('');
 
@@ -31,13 +34,15 @@ function AddStudentForm({ onAddStudent }) {
       return;
     }
 
-    onAddStudent({
-      id: Date.now(),
-      name,
-      studentId,
-      major,
-      gpa: gpaNum,
-    });
+    dispatch(
+      addStudent({
+        id: Date.now(),
+        name,
+        studentId,
+        major,
+        gpa: gpaNum,
+      }),
+    );
 
     setFormData(emptyForm);
     setError('');

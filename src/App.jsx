@@ -6,11 +6,11 @@ function App() {
   return (
     <div className="dashboard-layout">
       <aside className="sidebar">
-        <GpaSummary students={[]} />
-        <AddStudentForm onAddStudent={() => {}} />
+        <GpaSummary />
+        <AddStudentForm />
       </aside>
       <main className="content">
-        <StudentTable students={[]} onDeleteStudent={() => {}} />
+        <StudentTable />
       </main>
     </div>
   );
