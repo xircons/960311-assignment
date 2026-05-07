@@ -1,15 +1,25 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, isAnyOf } from '@reduxjs/toolkit';
+import {
+  addStudentAsync,
+  deleteStudentAsync,
+  fetchStudents,
+  updateStudentAsync,
+} from './studentsThunks.js';
 
-export const INITIAL_STUDENTS = [
-  { id: 1, name: 'Somchai Rakpong', studentId: 'STU-1001', major: 'DII', gpa: 3.85 },
-  { id: 2, name: 'Naree Thongdee', studentId: 'STU-1002', major: 'DII', gpa: 3.42 },
-  { id: 3, name: 'Krit Suwan', studentId: 'STU-1003', major: 'DII', gpa: 3.91 },
-  { id: 4, name: 'Malee Jaikaew', studentId: 'STU-1004', major: 'DII', gpa: 2.95 },
-  { id: 5, name: 'Pong Srisuk', studentId: 'STU-1005', major: 'DII', gpa: 3.28 },
-];
+function normalizeStudent(raw) {
+  const gpa = Number(raw.gpa);
+  return {
+    ...raw,
+    id: raw.id,
+    name: raw.name ?? '',
+    studentId: raw.studentId ?? '',
+    major: raw.major ?? '',
+    gpa: Number.isFinite(gpa) ? gpa : 0,
+  };
+}
 
 const initialState = {
-  list: INITIAL_STUDENTS,
+  list: [],
   status: 'idle',
   error: null,
 };
@@ -17,21 +27,73 @@ const initialState = {
 const studentsSlice = createSlice({
   name: 'students',
   initialState,
-  reducers: {
-    addStudent(state, action) {
-      state.list.push(action.payload);
-    },
-    deleteStudent(state, action) {
-      state.list = state.list.filter((s) => s.id !== action.payload);
-    },
-    updateStudent(state, action) {
-      const index = state.list.findIndex((s) => s.id === action.payload.id);
-      if (index !== -1) {
-        Object.assign(state.list[index], action.payload);
-      }
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchStudents.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchStudents.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.error = null;
+        state.list = action.payload.map(normalizeStudent);
+      })
+      .addCase(fetchStudents.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error =
+          action.payload != null
+            ? String(action.payload)
+            : String(action.error?.message ?? 'FAILED TO LOAD STUDENTS');
+      })
+      .addCase(addStudentAsync.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.error = null;
+        state.list.push(normalizeStudent(action.payload));
+      })
+      .addCase(updateStudentAsync.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.error = null;
+        const updated = normalizeStudent(action.payload);
+        const index = state.list.findIndex(
+          (s) => String(s.id) === String(updated.id),
+        );
+        if (index !== -1) {
+          state.list[index] = updated;
+        }
+      })
+      .addCase(deleteStudentAsync.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.error = null;
+        const id = action.payload;
+        state.list = state.list.filter((s) => String(s.id) !== String(id));
+      })
+      .addMatcher(
+        isAnyOf(
+          addStudentAsync.pending,
+          updateStudentAsync.pending,
+          deleteStudentAsync.pending,
+        ),
+        (state) => {
+          state.status = 'loading';
+          state.error = null;
+        },
+      )
+      .addMatcher(
+        isAnyOf(
+          addStudentAsync.rejected,
+          updateStudentAsync.rejected,
+          deleteStudentAsync.rejected,
+        ),
+        (state, action) => {
+          state.status = 'failed';
+          state.error =
+            action.payload != null
+              ? String(action.payload)
+              : String(action.error?.message ?? 'REQUEST FAILED');
+        },
+      );
   },
 });
 
-export const { addStudent, deleteStudent, updateStudent } = studentsSlice.actions;
 export default studentsSlice.reducer;

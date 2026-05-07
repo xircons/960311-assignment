@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addStudent } from '../features/students/studentsSlice.js';
+import { addStudentAsync } from '../features/students/studentsThunks.js';
 
 const emptyForm = { name: '', studentId: '', major: '', gpa: '' };
 
@@ -16,7 +16,7 @@ function AddStudentForm() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const name = formData.name.trim();
@@ -34,18 +34,24 @@ function AddStudentForm() {
       return;
     }
 
-    dispatch(
-      addStudent({
-        id: Date.now(),
-        name,
-        studentId,
-        major,
-        gpa: gpaNum,
-      }),
-    );
-
-    setFormData(emptyForm);
-    setError('');
+    try {
+      await dispatch(
+        addStudentAsync({
+          name,
+          studentId,
+          major,
+          gpa: gpaNum,
+        }),
+      ).unwrap();
+      setFormData(emptyForm);
+      setError('');
+    } catch (err) {
+      const msg =
+        typeof err === 'string'
+          ? err
+          : err?.message ?? 'FAILED TO ADD STUDENT';
+      setError(String(msg).toUpperCase());
+    }
   };
 
   return (
