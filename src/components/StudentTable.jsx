@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   deleteStudentAsync,
@@ -6,22 +6,76 @@ import {
   updateStudentAsync,
 } from '../features/students/studentsThunks.js';
 import {
-  selectAllStudents,
+  selectStudentById,
+  selectStudentIds,
+} from '../features/students/studentsSlice.js';
+import {
   selectStudentsError,
   selectStudentsStatus,
 } from '../features/students/selectors.js';
 import EditModal from './EditModal.jsx';
 
+function StudentRow({ id, index, onEdit }) {
+  const student = useSelector((state) =>
+    selectStudentById(state, id),
+  );
+
+  const dispatch = useDispatch();
+
+  if (!student) {
+    return null;
+  }
+
+  const gpaNum = Number(student.gpa);
+  const gpaDisplay = Number.isFinite(gpaNum)
+    ? gpaNum.toFixed(2)
+    : String(student.gpa ?? '');
+
+  return (
+    <tr
+      className={
+        Number.isFinite(gpaNum) && gpaNum >= 3.5 ? 'high-gpa' : ''
+      }
+    >
+      <td>{index + 1}</td>
+      <td>{(student.name ?? '').toUpperCase()}</td>
+      <td>{(student.studentId ?? '').toUpperCase()}</td>
+      <td>{(student.major ?? '').toUpperCase()}</td>
+      <td>{gpaDisplay}</td>
+      <td
+        className="col-act"
+        style={{ minWidth: '120px', width: 'auto' }}
+      >
+        <button
+          type="button"
+          className="btn-x"
+          style={{ marginRight: '14px' }}
+          aria-label={`Edit ${student.name}`}
+          onClick={() => onEdit(student)}
+        >
+          EDIT
+        </button>
+        <button
+          type="button"
+          className="btn-x"
+          aria-label={`Delete ${student.name}`}
+          onClick={() => dispatch(deleteStudentAsync(student.id))}
+        >
+          X
+        </button>
+      </td>
+    </tr>
+  );
+}
+
+const MemoStudentRow = memo(StudentRow);
+
 function StudentTable() {
   const dispatch = useDispatch();
-  const students = useSelector(selectAllStudents);
+  const studentIds = useSelector(selectStudentIds);
   const status = useSelector(selectStudentsStatus);
   const error = useSelector(selectStudentsError);
   const [editing, setEditing] = useState(null);
-
-  const handleDelete = (id) => {
-    dispatch(deleteStudentAsync(id));
-  };
 
   const handleEditSave = async (payload) => {
     try {
@@ -96,55 +150,21 @@ function StudentTable() {
               </tr>
             </thead>
             <tbody>
-              {students.length === 0 ? (
+              {studentIds.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="empty-row">
                     NO STUDENTS - ADD ONE FROM THE SIDEBAR.
                   </td>
                 </tr>
               ) : (
-                students.map((student, index) => {
-                  const gpaNum = Number(student.gpa);
-                  const gpaDisplay = Number.isFinite(gpaNum)
-                    ? gpaNum.toFixed(2)
-                    : String(student.gpa ?? '');
-                  return (
-                    <tr
-                      key={student.id}
-                      className={
-                        Number.isFinite(gpaNum) && gpaNum >= 3.5 ? 'high-gpa' : ''
-                      }
-                    >
-                      <td>{index + 1}</td>
-                      <td>{(student.name ?? '').toUpperCase()}</td>
-                      <td>{(student.studentId ?? '').toUpperCase()}</td>
-                      <td>{(student.major ?? '').toUpperCase()}</td>
-                      <td>{gpaDisplay}</td>
-                      <td
-                        className="col-act"
-                        style={{ minWidth: '120px', width: 'auto' }}
-                      >
-                        <button
-                          type="button"
-                          className="btn-x"
-                          style={{ marginRight: '14px' }}
-                          aria-label={`Edit ${student.name}`}
-                          onClick={() => setEditing(student)}
-                        >
-                          EDIT
-                        </button>
-                        <button
-                          type="button"
-                          className="btn-x"
-                          aria-label={`Delete ${student.name}`}
-                          onClick={() => handleDelete(student.id)}
-                        >
-                          X
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
+                studentIds.map((studentId, index) => (
+                  <MemoStudentRow
+                    key={studentId}
+                    id={studentId}
+                    index={index}
+                    onEdit={setEditing}
+                  />
+                ))
               )}
             </tbody>
           </table>

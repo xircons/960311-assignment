@@ -1,4 +1,8 @@
-import { createSlice, isAnyOf } from '@reduxjs/toolkit';
+import {
+  createEntityAdapter,
+  createSlice,
+  isAnyOf,
+} from '@reduxjs/toolkit';
 import {
   addStudentAsync,
   deleteStudentAsync,
@@ -10,7 +14,7 @@ function normalizeStudent(raw) {
   const gpa = Number(raw.gpa);
   return {
     ...raw,
-    id: raw.id,
+    id: String(raw.id),
     name: raw.name ?? '',
     studentId: raw.studentId ?? '',
     major: raw.major ?? '',
@@ -18,11 +22,17 @@ function normalizeStudent(raw) {
   };
 }
 
-const initialState = {
-  list: [],
+const studentsAdapter = createEntityAdapter({
+  sortComparer: (a, b) =>
+    String(a.name ?? '').localeCompare(String(b.name ?? ''), undefined, {
+      sensitivity: 'base',
+    }),
+});
+
+const initialState = studentsAdapter.getInitialState({
   status: 'idle',
   error: null,
-};
+});
 
 const studentsSlice = createSlice({
   name: 'students',
@@ -37,7 +47,10 @@ const studentsSlice = createSlice({
       .addCase(fetchStudents.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.error = null;
-        state.list = action.payload.map(normalizeStudent);
+        studentsAdapter.setAll(
+          state,
+          action.payload.map(normalizeStudent),
+        );
       })
       .addCase(fetchStudents.rejected, (state, action) => {
         state.status = 'failed';
@@ -49,24 +62,18 @@ const studentsSlice = createSlice({
       .addCase(addStudentAsync.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.error = null;
-        state.list.push(normalizeStudent(action.payload));
+        studentsAdapter.addOne(state, normalizeStudent(action.payload));
       })
       .addCase(updateStudentAsync.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.error = null;
-        const updated = normalizeStudent(action.payload);
-        const index = state.list.findIndex(
-          (s) => String(s.id) === String(updated.id),
-        );
-        if (index !== -1) {
-          state.list[index] = updated;
-        }
+        studentsAdapter.upsertOne(state, normalizeStudent(action.payload));
       })
       .addCase(deleteStudentAsync.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.error = null;
-        const id = action.payload;
-        state.list = state.list.filter((s) => String(s.id) !== String(id));
+        const id = String(action.payload);
+        studentsAdapter.removeOne(state, id);
       })
       .addMatcher(
         isAnyOf(
@@ -95,5 +102,12 @@ const studentsSlice = createSlice({
       );
   },
 });
+
+export const {
+  selectAll: selectAllStudents,
+  selectById: selectStudentById,
+  selectTotal: selectStudentCount,
+  selectIds: selectStudentIds,
+} = studentsAdapter.getSelectors((state) => state.students);
 
 export default studentsSlice.reducer;
