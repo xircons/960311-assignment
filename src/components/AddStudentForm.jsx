@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { addStudentAsync } from '../features/students/studentsThunks.js';
+import { useAddStudentMutation } from '../features/students/studentsApi.js';
 
 const emptyForm = { name: '', studentId: '', major: '', gpa: '' };
 
 function AddStudentForm() {
-  const dispatch = useDispatch();
+  const [addStudent, { isLoading }] = useAddStudentMutation();
   const [formData, setFormData] = useState(emptyForm);
   const [error, setError] = useState('');
 
@@ -35,21 +34,25 @@ function AddStudentForm() {
     }
 
     try {
-      await dispatch(
-        addStudentAsync({
-          name,
-          studentId,
-          major,
-          gpa: gpaNum,
-        }),
-      ).unwrap();
+      await addStudent({
+        name,
+        studentId,
+        major,
+        gpa: gpaNum,
+      }).unwrap();
       setFormData(emptyForm);
       setError('');
     } catch (err) {
       const msg =
         typeof err === 'string'
           ? err
-          : err?.message ?? 'FAILED TO ADD STUDENT';
+          : err?.data != null
+            ? String(
+                typeof err.data === 'string'
+                  ? err.data
+                  : err.data?.message ?? err.error,
+              )
+            : err?.message ?? 'FAILED TO ADD STUDENT';
       setError(String(msg).toUpperCase());
     }
   };
@@ -116,7 +119,7 @@ function AddStudentForm() {
           />
         </div>
         {error ? <div className="form-error">{error}</div> : null}
-        <button type="submit" className="btn-primary">
+        <button type="submit" className="btn-primary" disabled={isLoading}>
           + ADD STUDENT
         </button>
       </form>

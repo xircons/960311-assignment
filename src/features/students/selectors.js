@@ -1,5 +1,13 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { selectAllStudents } from './studentsSlice.js';
+import { studentsApi } from './studentsApi.js';
+
+const selectGetStudentsQueryResult =
+  studentsApi.endpoints.getStudents.select();
+
+export const selectAllStudents = createSelector(
+  [selectGetStudentsQueryResult],
+  (queryResult) => queryResult.data ?? [],
+);
 
 export const selectAverageGpa = createSelector(
   [selectAllStudents],
@@ -45,6 +53,7 @@ export const selectGpaDistribution = createSelector(
   },
 );
 
-export const selectStudentsStatus = (state) => state.students.status;
-
-export const selectStudentsError = (state) => state.students.error;
+export const selectStudentCount = createSelector(
+  [selectAllStudents],
+  (students) => students.length,
+);

@@ -1,96 +1,53 @@
-import { memo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useState } from 'react';
 import {
-  deleteStudentAsync,
-  fetchStudents,
-  updateStudentAsync,
-} from '../features/students/studentsThunks.js';
-import {
-  selectStudentById,
-  selectStudentIds,
-} from '../features/students/studentsSlice.js';
-import {
-  selectStudentsError,
-  selectStudentsStatus,
-} from '../features/students/selectors.js';
+  useGetStudentsQuery,
+  useUpdateStudentMutation,
+} from '../features/students/studentsApi.js';
+import StudentRow from './StudentRow.jsx';
 import EditModal from './EditModal.jsx';
 
-function StudentRow({ id, index, onEdit }) {
-  const student = useSelector((state) =>
-    selectStudentById(state, id),
-  );
-
-  const dispatch = useDispatch();
-
-  if (!student) {
-    return null;
+function formatQueryError(error) {
+  if (error == null) {
+    return 'REQUEST FAILED';
   }
-
-  const gpaNum = Number(student.gpa);
-  const gpaDisplay = Number.isFinite(gpaNum)
-    ? gpaNum.toFixed(2)
-    : String(student.gpa ?? '');
-
-  return (
-    <tr
-      className={
-        Number.isFinite(gpaNum) && gpaNum >= 3.5 ? 'high-gpa' : ''
-      }
-    >
-      <td>{index + 1}</td>
-      <td>{(student.name ?? '').toUpperCase()}</td>
-      <td>{(student.studentId ?? '').toUpperCase()}</td>
-      <td>{(student.major ?? '').toUpperCase()}</td>
-      <td>{gpaDisplay}</td>
-      <td
-        className="col-act"
-        style={{ minWidth: '120px', width: 'auto' }}
-      >
-        <button
-          type="button"
-          className="btn-x"
-          style={{ marginRight: '14px' }}
-          aria-label={`Edit ${student.name}`}
-          onClick={() => onEdit(student)}
-        >
-          EDIT
-        </button>
-        <button
-          type="button"
-          className="btn-x"
-          aria-label={`Delete ${student.name}`}
-          onClick={() => dispatch(deleteStudentAsync(student.id))}
-        >
-          X
-        </button>
-      </td>
-    </tr>
-  );
+  if (typeof error === 'string') {
+    return error;
+  }
+  if (typeof error === 'object' && 'status' in error) {
+    const data = error.data;
+    if (typeof data === 'string' && data) {
+      return data;
+    }
+    if (data != null && typeof data === 'object' && 'message' in data) {
+      return String(data.message);
+    }
+    return `HTTP ERROR ${error.status}`;
+  }
+  return String(error);
 }
 
-const MemoStudentRow = memo(StudentRow);
-
 function StudentTable() {
-  const dispatch = useDispatch();
-  const studentIds = useSelector(selectStudentIds);
-  const status = useSelector(selectStudentsStatus);
-  const error = useSelector(selectStudentsError);
+  const { data: students = [], isLoading, isError, error, refetch } =
+    useGetStudentsQuery();
+  const [updateStudent] = useUpdateStudentMutation();
   const [editing, setEditing] = useState(null);
 
   const handleEditSave = async (payload) => {
     try {
-      await dispatch(updateStudentAsync(payload)).unwrap();
+      await updateStudent(payload).unwrap();
       setEditing(null);
     } catch {
-      // Modal stays open; global error state shows in banner if status becomes failed
+      // Modal stays open; user can retry or cancel
     }
   };
+
+  const showTable = !isLoading && !isError;
 
   return (
     <section className="panel panel-main">
       <h2 className="panel-header">STUDENTS</h2>
       <div className="table-scroll">
-        {status === 'loading' ? (
+        {isLoading ? (
           <div
             className="table-status-message"
             style={{
@@ -107,7 +64,7 @@ function StudentTable() {
           </div>
         ) : null}
 
-        {status === 'failed' ? (
+        {isError ? (
           <div
             className="table-error-panel"
             style={{
@@ -120,19 +77,19 @@ function StudentTable() {
               style={{ margin: '0 0 12px 0' }}
               role="alert"
             >
-              {error ?? 'REQUEST FAILED'}
+              {formatQueryError(error).toUpperCase()}
             </div>
             <button
               type="button"
               className="btn-primary"
-              onClick={() => dispatch(fetchStudents())}
+              onClick={() => refetch()}
             >
               RETRY
             </button>
           </div>
         ) : null}
 
-        {status === 'succeeded' ? (
+        {showTable ? (
           <table className="student-table">
             <thead>
               <tr>
@@ -150,17 +107,17 @@ function StudentTable() {
               </tr>
             </thead>
             <tbody>
-              {studentIds.length === 0 ? (
+              {students.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="empty-row">
                     NO STUDENTS - ADD ONE FROM THE SIDEBAR.
                   </td>
                 </tr>
               ) : (
-                studentIds.map((studentId, index) => (
-                  <MemoStudentRow
-                    key={studentId}
-                    id={studentId}
+                students.map((student, index) => (
+                  <StudentRow
+                    key={student.id}
+                    student={student}
                     index={index}
                     onEdit={setEditing}
                   />
