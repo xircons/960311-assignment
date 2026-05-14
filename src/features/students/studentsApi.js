@@ -58,6 +58,45 @@ export const studentsApi = createApi({
         },
       }),
       transformResponse: (raw) => normalizeStudent(raw),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        const tempId = `optimistic-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`;
+        const gpa = Number(arg.gpa);
+        const optimistic = {
+          id: tempId,
+          name: arg.name ?? '',
+          studentId: arg.studentId ?? '',
+          major: arg.major ?? '',
+          gpa: Number.isFinite(gpa) ? gpa : 0,
+        };
+        const patchResult = dispatch(
+          studentsApi.util.updateQueryData('getStudents', undefined, (draft) => {
+            draft.push(optimistic);
+            draft.sort((a, b) =>
+              String(a.name ?? '').localeCompare(String(b.name ?? ''), undefined, {
+                sensitivity: 'base',
+              }),
+            );
+          }),
+        );
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            studentsApi.util.updateQueryData('getStudents', undefined, (draft) => {
+              const idx = draft.findIndex((s) => String(s.id) === tempId);
+              if (idx !== -1) {
+                draft[idx] = data;
+              }
+              draft.sort((a, b) =>
+                String(a.name ?? '').localeCompare(String(b.name ?? ''), undefined, {
+                  sensitivity: 'base',
+                }),
+              );
+            }),
+          );
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: [{ type: 'LIST', id: 'LIST' }],
     }),
     updateStudent: build.mutation({
