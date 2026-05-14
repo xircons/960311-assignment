@@ -27,8 +27,18 @@ function formatQueryError(error) {
 }
 
 function StudentTable() {
-  const { data: students = [], isLoading, isError, error, refetch } =
-    useGetStudentsQuery();
+  const {
+    data: students = [],
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useGetStudentsQuery(undefined, {
+    pollingInterval: 30000,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
   const [updateStudent] = useUpdateStudentMutation();
   const [editing, setEditing] = useState(null);
 
@@ -37,15 +47,36 @@ function StudentTable() {
       await updateStudent(payload).unwrap();
       setEditing(null);
     } catch {
-      // Modal stays open; user can retry or cancel
     }
   };
 
   const showTable = !isLoading && !isError;
 
+  const showSyncing = isFetching && !isLoading;
+
   return (
     <section className="panel panel-main">
       <h2 className="panel-header">STUDENTS</h2>
+      {showSyncing ? (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            margin: 0,
+            padding: '10px 16px',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            fontSize: '11px',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: '#ffffff',
+            backgroundColor: '#1a1a1a',
+            borderBottom: '1px solid #333333',
+            borderRadius: 0,
+          }}
+        >
+          [ SYNCING... ]
+        </div>
+      ) : null}
       <div className="table-scroll">
         {isLoading ? (
           <div

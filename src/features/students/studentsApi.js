@@ -72,6 +72,40 @@ export const studentsApi = createApi({
         },
       }),
       transformResponse: (raw) => normalizeStudent(raw),
+      async onQueryStarted(student, { dispatch, queryFulfilled }) {
+        const idStr = String(student.id);
+        const gpa = Number(student.gpa);
+        const optimistic = {
+          ...student,
+          id: idStr,
+          name: student.name ?? '',
+          studentId: student.studentId ?? '',
+          major: student.major ?? '',
+          gpa: Number.isFinite(gpa) ? gpa : 0,
+        };
+
+        const patchList = dispatch(
+          studentsApi.util.updateQueryData('getStudents', undefined, (draft) => {
+            const idx = draft.findIndex((s) => String(s.id) === idStr);
+            if (idx !== -1) {
+              Object.assign(draft[idx], optimistic);
+            }
+          }),
+        );
+
+        const patchDetail = dispatch(
+          studentsApi.util.updateQueryData('getStudentById', idStr, (draft) => {
+            Object.assign(draft, optimistic);
+          }),
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patchList.undo();
+          patchDetail.undo();
+        }
+      },
       invalidatesTags: (_result, _error, arg) => [
         { type: 'Student', id: String(arg.id) },
         { type: 'LIST', id: 'LIST' },
